@@ -7,7 +7,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button, Input, Card, CardContent } from "@/components/ui";
-import { Mail, Lock, User, Phone, MapPin, Home } from "lucide-react";
 
 const registerSchema = z
   .object({
@@ -95,7 +94,6 @@ export default function RegisterPage() {
                   </label>
                   <Input
                     {...register("firstName")}
-                    icon={<User className="w-5 h-5" />}
                     placeholder="Jean"
                     error={errors.firstName?.message}
                   />
@@ -107,7 +105,6 @@ export default function RegisterPage() {
                   </label>
                   <Input
                     {...register("lastName")}
-                    icon={<User className="w-5 h-5" />}
                     placeholder="Dupont"
                     error={errors.lastName?.message}
                   />
@@ -121,7 +118,6 @@ export default function RegisterPage() {
                 <Input
                   {...register("email")}
                   type="email"
-                  icon={<Mail className="w-5 h-5" />}
                   placeholder="jean.dupont@example.com"
                   error={errors.email?.message}
                 />
@@ -134,7 +130,6 @@ export default function RegisterPage() {
                 <Input
                   {...register("phone")}
                   type="tel"
-                  icon={<Phone className="w-5 h-5" />}
                   placeholder="06 12 34 56 78"
                   error={errors.phone?.message}
                 />
@@ -148,7 +143,6 @@ export default function RegisterPage() {
                   <Input
                     {...register("password")}
                     type="password"
-                    icon={<Lock className="w-5 h-5" />}
                     placeholder="••••••••"
                     error={errors.password?.message}
                   />
@@ -161,7 +155,6 @@ export default function RegisterPage() {
                   <Input
                     {...register("confirmPassword")}
                     type="password"
-                    icon={<Lock className="w-5 h-5" />}
                     placeholder="••••••••"
                     error={errors.confirmPassword?.message}
                   />
@@ -180,7 +173,6 @@ export default function RegisterPage() {
                     </label>
                     <Input
                       {...register("address")}
-                      icon={<Home className="w-5 h-5" />}
                       placeholder="123 rue de la République"
                       error={errors.address?.message}
                     />
@@ -193,7 +185,6 @@ export default function RegisterPage() {
                       </label>
                       <Input
                         {...register("city")}
-                        icon={<MapPin className="w-5 h-5" />}
                         placeholder="Montauban"
                         error={errors.city?.message}
                       />
@@ -205,7 +196,6 @@ export default function RegisterPage() {
                       </label>
                       <Input
                         {...register("postalCode")}
-                        icon={<MapPin className="w-5 h-5" />}
                         placeholder="82000"
                         error={errors.postalCode?.message}
                       />
