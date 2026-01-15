@@ -87,38 +87,36 @@ export default function ServiceDetailPage() {
   >([]);
 
   useEffect(() => {
+    const fetchService = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(`/api/services/by-slug/${slug}`);
+        if (!response.ok) {
+          throw new Error("Erreur lors du chargement du service");
+        }
+
+        const foundService = await response.json();
+
+        if (foundService.error) {
+          setError(foundService.error);
+          return;
+        }
+
+        setService(foundService);
+        setDuration(foundService.minDuration);
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : "Une erreur est survenue"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchService();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
-
-  const fetchService = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch("/api/services");
-      if (!response.ok) {
-        throw new Error("Erreur lors du chargement du service");
-      }
-
-      const services = await response.json();
-      const foundService = services.find((s: Service) => s.slug === slug);
-
-      if (!foundService) {
-        setError("Service non trouvé");
-        return;
-      }
-
-      setService(foundService);
-      setDuration(foundService.minDuration);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Une erreur est survenue"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const calculatePrice = () => {
     if (!service) return 0;
