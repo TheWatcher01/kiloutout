@@ -64,10 +64,6 @@ export function calculateDistance(
   return Math.round(distance * 100) / 100;
 }
 
-function toRad(degrees: number): number {
-  return degrees * (Math.PI / 180);
-}
-
 export function toRad(degrees: number): number {
   return degrees * (Math.PI / 180);
 }
