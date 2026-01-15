@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Sparkles,
@@ -7,60 +10,70 @@ import {
   Trees,
   Briefcase,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui";
 
-const services = [
-  {
-    name: "Conciergerie",
-    slug: "conciergerie",
-    description: "Gestion de vos besoins quotidiens et services personnalisés",
-    icon: Briefcase,
-    color: "bg-purple-100 text-purple-600",
-  },
-  {
-    name: "Femme de ménage",
-    slug: "menage",
-    description: "Nettoyage professionnel et entretien de votre domicile",
-    icon: Sparkles,
-    color: "bg-blue-100 text-blue-600",
-  },
-  {
-    name: "Aide à la personne",
-    slug: "aide-personne",
-    description: "Accompagnement et assistance pour les personnes dépendantes",
-    icon: Heart,
-    color: "bg-pink-100 text-pink-600",
-  },
-  {
-    name: "Repassage",
-    slug: "repassage",
-    description: "Linge soigneusement repassé et plié selon vos préférences",
-    icon: Shirt,
-    color: "bg-orange-100 text-orange-600",
-  },
-  {
-    name: "Gardiennage d'animaux",
-    slug: "gardiennage-animaux",
-    description: "Soins et garde de vos compagnons en votre absence",
-    icon: PawPrint,
-    color: "bg-amber-100 text-amber-600",
-  },
-  {
-    name: "Tonte de pelouse",
-    slug: "tonte-pelouse",
-    description: "Entretien professionnel de votre jardin et espaces verts",
-    icon: Trees,
-    color: "bg-green-100 text-green-600",
-  },
-];
-
-export const metadata = {
-  title: "Nos Services",
-  description: "Découvrez notre gamme complète de services à domicile",
+const serviceIcons = {
+  Concierge: Briefcase,
+  Sparkles: Sparkles,
+  Heart: Heart,
+  Shirt: Shirt,
+  PawPrint: PawPrint,
+  Trees: Trees,
 };
 
+const serviceColors: Record<string, string> = {
+  conciergerie: "bg-purple-100 text-purple-600",
+  menage: "bg-blue-100 text-blue-600",
+  "aide-personne": "bg-pink-100 text-pink-600",
+  repassage: "bg-orange-100 text-orange-600",
+  "gardiennage-animaux": "bg-amber-100 text-amber-600",
+  "tonte-pelouse": "bg-green-100 text-green-600",
+};
+
+interface Service {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  icon: string;
+  basePrice: number;
+}
+
 export default function ServicesPage() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await fetch("/api/services");
+        if (response.ok) {
+          const data = await response.json();
+          setServices(data);
+        }
+      } catch (error) {
+        console.error("Error fetching services:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchServices();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-20">
+        <div className="flex flex-col items-center justify-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+          <p className="text-gray-600">Chargement des services...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="max-w-6xl mx-auto">
@@ -77,33 +90,38 @@ export default function ServicesPage() {
 
         {/* Services Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service) => (
-            <Link
-              key={service.slug}
-              href={`/services/${service.slug}`}
-              className="group"
-            >
-              <Card className="h-full card-hover transition-all duration-300 hover:shadow-lg">
-                <CardHeader>
-                  <div
-                    className={`w-16 h-16 rounded-xl ${service.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}
-                  >
-                    <service.icon className="w-8 h-8" />
-                  </div>
-                  <CardTitle className="text-xl">{service.name}</CardTitle>
-                  <CardDescription className="text-base mt-2">
-                    {service.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center text-primary font-medium group-hover:translate-x-1 transition-transform">
-                    En savoir plus
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+          {services.map((service) => {
+            const Icon = serviceIcons[service.icon as keyof typeof serviceIcons] || Briefcase;
+            const colorClass = serviceColors[service.slug] || "bg-gray-100 text-gray-600";
+            
+            return (
+              <Link
+                key={service.slug}
+                href={`/services/${service.slug}`}
+                className="group"
+              >
+                <Card className="h-full card-hover transition-all duration-300 hover:shadow-lg">
+                  <CardHeader>
+                    <div
+                      className={`w-16 h-16 rounded-xl ${colorClass} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <Icon className="w-8 h-8" />
+                    </div>
+                    <CardTitle className="text-xl">{service.name}</CardTitle>
+                    <CardDescription className="text-base mt-2">
+                      {service.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center text-primary font-medium group-hover:translate-x-1 transition-transform">
+                      En savoir plus
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
 
         {/* CTA Section */}
