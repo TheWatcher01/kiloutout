@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
+import {
+  updateCalendarEvent,
+  deleteCalendarEvent,
+  isGoogleCalendarConnected,
+} from "@/lib/googleCalendar";
 
 export async function GET(
   request: NextRequest,
@@ -90,7 +95,20 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { status, adminNotes } = body;
+    const { status, adminNotes, requestedDate, requestedTime, duration } = body;
+
+    const { id } = await params;
+    
+    const existingBooking = await prisma.booking.findUnique({
+      where: { id },
+      select: { 
+        googleEventId: true, 
+        status: true,
+        requestedDate: true,
+        requestedTime: true,
+        duration: true,
+      },
+    });
 
     const updateData: any = {};
 
@@ -110,7 +128,18 @@ export async function PATCH(
       updateData.adminNotes = adminNotes;
     }
 
-    const { id } = await params;
+    if (requestedDate !== undefined) {
+      updateData.requestedDate = requestedDate;
+    }
+
+    if (requestedTime !== undefined) {
+      updateData.requestedTime = requestedTime;
+    }
+
+    if (duration !== undefined) {
+      updateData.duration = duration;
+    }
+
     const booking = await prisma.booking.update({
       where: { id },
       data: updateData,
@@ -132,6 +161,36 @@ export async function PATCH(
         },
       },
     });
+
+    const isConnected = await isGoogleCalendarConnected();
+    
+    if (existingBooking?.googleEventId && booking.status === "CONFIRMED") {
+      const hasDateTimeChanged = 
+        requestedDate !== undefined || 
+        requestedTime !== undefined || 
+        duration !== undefined;
+
+      if (hasDateTimeChanged) {
+        try {
+          if (isConnected) {
+            await updateCalendarEvent(existingBooking.googleEventId, booking);
+          }
+        } catch (calendarError) {
+          console.error("Error updating calendar event:", calendarError);
+        }
+      }
+    }
+
+    if (status === "CANCELLED" && existingBooking?.googleEventId) {
+      try {
+        if (isConnected) {
+          await deleteCalendarEvent(existingBooking.googleEventId);
+        }
+        updateData.googleEventId = null;
+      } catch (calendarError) {
+        console.error("Error deleting calendar event:", calendarError);
+      }
+    }
 
     if (status) {
       await prisma.notification.create({

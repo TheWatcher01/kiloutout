@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
+import { deleteCalendarEvent, isGoogleCalendarConnected } from "@/lib/googleCalendar";
 
 export async function POST(
   request: NextRequest,
@@ -30,12 +31,30 @@ export async function POST(
     const { reason } = body;
 
     const { id } = await params;
+    
+    const existingBooking = await prisma.booking.findUnique({
+      where: { id },
+      select: { googleEventId: true },
+    });
+
+    if (existingBooking?.googleEventId) {
+      try {
+        const isConnected = await isGoogleCalendarConnected();
+        if (isConnected) {
+          await deleteCalendarEvent(existingBooking.googleEventId);
+        }
+      } catch (calendarError) {
+        console.error("Error deleting calendar event:", calendarError);
+      }
+    }
+
     const booking = await prisma.booking.update({
       where: { id },
       data: {
         status: "CANCELLED",
         cancelledAt: new Date(),
         adminNotes: reason || null,
+        googleEventId: null,
       },
       include: {
         service: true,

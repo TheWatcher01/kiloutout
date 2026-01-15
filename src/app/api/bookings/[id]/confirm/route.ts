@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
+import { createCalendarEvent, isGoogleCalendarConnected } from "@/lib/googleCalendar";
 
 export async function POST(
   request: NextRequest,
@@ -52,6 +53,25 @@ export async function POST(
       },
     });
 
+    let googleEventId: string | null = null;
+    
+    try {
+      const isConnected = await isGoogleCalendarConnected();
+      if (isConnected) {
+        const eventId = await createCalendarEvent(booking);
+        googleEventId = eventId || null;
+        
+        if (googleEventId) {
+          await prisma.booking.update({
+            where: { id },
+            data: { googleEventId },
+          });
+        }
+      }
+    } catch (calendarError) {
+      console.error("Error creating calendar event:", calendarError);
+    }
+
     await prisma.notification.create({
       data: {
         userId: booking.userId,
@@ -62,7 +82,7 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(booking);
+    return NextResponse.json({ ...booking, googleEventId });
   } catch (error) {
     console.error("Error confirming booking:", error);
     return NextResponse.json(
