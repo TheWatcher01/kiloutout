@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
+import { sendWelcomeEmail } from "@/lib/email";
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -56,6 +57,15 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Send welcome email (don't await to avoid blocking response)
+    sendWelcomeEmail({
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    }).catch((error) => {
+      console.error("Failed to send welcome email:", error);
+    });
+
     return NextResponse.json(
       { message: "Compte créé avec succès", user },
       { status: 201 }
@@ -63,7 +73,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Données invalides", details: error.errors },
+        { error: "Données invalides", details: error.issues },
         { status: 400 }
       );
     }

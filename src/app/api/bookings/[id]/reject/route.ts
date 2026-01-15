@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { deleteCalendarEvent, isGoogleCalendarConnected } from "@/lib/googleCalendar";
+import { sendBookingRejectedEmail } from "@/lib/email";
 
 export async function POST(
   request: NextRequest,
@@ -85,6 +86,11 @@ export async function POST(
           ? `Votre réservation pour ${booking.service.name} a été annulée. Raison: ${reason}`
           : `Votre réservation pour ${booking.service.name} a été annulée.`,
       },
+    });
+
+    // Send rejection email (don't await to avoid blocking response)
+    sendBookingRejectedEmail(booking, reason).catch((error) => {
+      console.error("Failed to send booking rejected email:", error);
     });
 
     return NextResponse.json(booking);

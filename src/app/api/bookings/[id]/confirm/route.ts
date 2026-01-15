@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { createCalendarEvent, isGoogleCalendarConnected } from "@/lib/googleCalendar";
+import { sendBookingConfirmedEmail } from "@/lib/email";
 
 export async function POST(
   request: NextRequest,
@@ -80,6 +81,11 @@ export async function POST(
         title: "Réservation confirmée",
         message: `Votre réservation pour ${booking.service.name} a été confirmée pour le ${new Date(booking.requestedDate).toLocaleDateString("fr-FR")}.`,
       },
+    });
+
+    // Send confirmation email (don't await to avoid blocking response)
+    sendBookingConfirmedEmail(booking).catch((error) => {
+      console.error("Failed to send booking confirmed email:", error);
     });
 
     return NextResponse.json({ ...booking, googleEventId });

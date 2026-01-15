@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { toRad, geocodeAddress } from "@/lib/geo";
+import { sendBookingCreatedEmail, sendNewBookingNotificationToAdmin } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   try {
@@ -148,6 +149,15 @@ export async function POST(request: NextRequest) {
       },
       include: {
         service: true,
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+          },
+        },
         options: {
           include: {
             serviceOption: true,
@@ -164,6 +174,15 @@ export async function POST(request: NextRequest) {
         title: "Réservation créée",
         message: `Votre réservation pour ${service.name} a été créée avec succès.`,
       },
+    });
+
+    // Send emails (don't await to avoid blocking response)
+    sendBookingCreatedEmail(booking).catch((error) => {
+      console.error("Failed to send booking created email:", error);
+    });
+
+    sendNewBookingNotificationToAdmin(booking).catch((error) => {
+      console.error("Failed to send admin notification email:", error);
     });
 
     return NextResponse.json(booking, { status: 201 });
