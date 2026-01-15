@@ -47,7 +47,7 @@ export function calculateDistance(
   lat2: number,
   lon2: number
 ): number {
-  const R = 6371; // Rayon de la Terre en km
+  const R = 6371; // Earth radius in km
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
 
@@ -65,6 +65,10 @@ export function calculateDistance(
 }
 
 function toRad(degrees: number): number {
+  return degrees * (Math.PI / 180);
+}
+
+export function toRad(degrees: number): number {
   return degrees * (Math.PI / 180);
 }
 

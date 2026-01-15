@@ -357,8 +357,8 @@ export default function ServiceDetailPage() {
                         >
                           <Checkbox
                             checked={selectedServiceOptions.includes(option.id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
+                            onCheckedChange={(checked) => {
+                              if (checked) {
                                 setSelectedServiceOptions([
                                   ...selectedServiceOptions,
                                   option.id,
