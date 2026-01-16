@@ -4,6 +4,7 @@ import { Providers } from "@/components/Providers";
 import { Header, Footer } from "@/components/layout";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://kiloutout.fr"),
   title: {
     default: "Kiloutout Services - Services à domicile",
     template: "%s | Kiloutout Services",
@@ -67,8 +68,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
-      <body className="min-h-screen bg-gray-50 font-sans antialiased">
+    <html lang="fr" suppressHydrationWarning>
+      <body className="min-h-screen bg-gray-50 font-sans antialiased" suppressHydrationWarning>
         <Providers>
           <div className="flex min-h-screen flex-col">
             <Header />
