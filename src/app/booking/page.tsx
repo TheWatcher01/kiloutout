@@ -275,7 +275,7 @@ export default function BookingPage() {
       });
 
       if (response.ok) {
-        router.push("/bookings?success=true");
+        router.push("/dashboard?success=true");
       } else {
         const error = await response.json();
         alert(error.error || "Erreur lors de la création de la réservation");
