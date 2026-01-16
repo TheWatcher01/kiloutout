@@ -33,14 +33,12 @@ export function Header() {
     ];
 
     const clientLinks = [
-        { href: "/reservations", label: "Mes réservations", icon: Calendar },
+        { href: "/dashboard", label: "Mes réservations", icon: Calendar },
         { href: "/profil", label: "Mon profil", icon: User },
     ];
 
     const adminLinks = [
-        { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-        { href: "/admin/reservations", label: "Réservations", icon: Calendar },
-        { href: "/admin/services", label: "Services", icon: Briefcase },
+        { href: "/admin", label: "Réservations", icon: LayoutDashboard },
         { href: "/admin/settings", label: "Paramètres", icon: Settings },
     ];
 
