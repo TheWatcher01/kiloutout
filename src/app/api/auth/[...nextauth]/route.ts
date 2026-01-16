@@ -50,7 +50,7 @@ export const authOptions: NextAuthOptions = {
                     email: user.email,
                     firstName: user.firstName,
                     lastName: user.lastName,
-                    role: user.role,
+                    role: user.role as "ADMIN" | "CLIENT",
                     image: user.image,
                 };
             },

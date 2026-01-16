@@ -4,14 +4,19 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 
-interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface CheckboxProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "onChange"> {
     label?: string;
     description?: string;
+    onCheckedChange?: (checked: boolean) => void;
 }
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
-    ({ className, label, description, id, ...props }, ref) => {
+    ({ className, label, description, id, onCheckedChange, ...props }, ref) => {
         const checkboxId = id || React.useId();
+
+        const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+            onCheckedChange?.(event.target.checked);
+        };
 
         return (
             <div className="flex items-start gap-3">
@@ -28,6 +33,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
                             "appearance-none cursor-pointer",
                             className
                         )}
+                        onChange={handleChange}
                         {...props}
                     />
                     <Check className="absolute h-3.5 w-3.5 text-white pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" />

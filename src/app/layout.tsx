@@ -1,13 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Header, Footer } from "@/components/layout";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
 
 export const metadata: Metadata = {
   title: {
@@ -73,7 +67,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className={inter.variable}>
+    <html lang="fr">
       <body className="min-h-screen bg-gray-50 font-sans antialiased">
         <Providers>
           <div className="flex min-h-screen flex-col">
